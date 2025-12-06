@@ -29,11 +29,11 @@ interface WasteTableProps {
 }
 
 const categoryColors: Record<WasteCategory, string> = {
-  Пластик: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-  Бумага: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-  Металл: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
-  Стекло: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  Смешанный: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+  Пластик: 'bg-brand-yellow/20 text-brand-black dark:bg-brand-yellow/30 dark:text-brand-yellow',
+  Бумага: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
+  Металл: 'bg-muted text-muted-foreground dark:bg-muted dark:text-muted-foreground',
+  Стекло: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
+  Смешанный: 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300',
 }
 
 export function WasteTable({ items }: WasteTableProps) {
