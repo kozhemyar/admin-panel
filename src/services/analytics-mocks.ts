@@ -20,7 +20,7 @@ export interface DashboardData {
   }>
 }
 
-export async function getDashboardData(): Promise<DashboardData> {
+export function getDashboardData(): DashboardData {
   return {
     kpis: {
       totalWasteCollected: 1240, // kg

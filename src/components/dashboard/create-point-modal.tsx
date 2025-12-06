@@ -1,6 +1,9 @@
 'use client'
 
-import { Dispatch, SetStateAction, useState } from 'react'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Dispatch, SetStateAction } from 'react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 
 import { Button } from '../shared/button'
 import {
@@ -10,7 +13,26 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../shared/dialog'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '../shared/form'
 import { Input } from '../shared/input'
+
+import { useCreatePoint } from '@/api/points/queries/use-create-point'
+import { CreatePointRequest } from '@/api/points/types'
+
+const createPointSchema = z.object({
+  name: z.string().min(3, 'Минимальная длина имени — 3 символа'),
+  login: z.string().min(6, 'Минимальная длина логина — 6 символов'),
+  password: z.string().min(6, 'Минимальная длина пароля — 6 символов'),
+})
+
+type CreatePointForm = z.infer<typeof createPointSchema>
 
 interface CreatePointModalProps {
   open: boolean
@@ -18,20 +40,26 @@ interface CreatePointModalProps {
 }
 
 export const CreatePointModal = ({ open, setOpen }: CreatePointModalProps) => {
-  const [name, setName] = useState('')
-  const [login, setLogin] = useState('')
-  const [password, setPassword] = useState('')
+  const { mutate: createPoint, isPending } = useCreatePoint()
 
-  const handleCreate = () => {
-    const data = { name, login, password }
-    console.log('Create point:', data)
+  const form = useForm<CreatePointForm>({
+    resolver: zodResolver(createPointSchema),
+    defaultValues: {
+      name: '',
+      login: '',
+      password: '',
+    },
+  })
 
-    // логика создания точки
+  const onSubmit = (values: CreatePointForm) => {
+    const payload: CreatePointRequest = values
 
-    setOpen(false)
-    setName('')
-    setLogin('')
-    setPassword('')
+    createPoint(payload, {
+      onSuccess: () => {
+        form.reset()
+        setOpen(false)
+      },
+    })
   }
 
   return (
@@ -41,42 +69,61 @@ export const CreatePointModal = ({ open, setOpen }: CreatePointModalProps) => {
           <DialogTitle>Создание новой точки</DialogTitle>
         </DialogHeader>
 
-        <div className='mt-4 flex flex-col gap-4'>
-          <div className='flex flex-col gap-2'>
-            <div>Название</div>
-            <Input
-              placeholder='Введите название точки'
-              value={name}
-              onChange={e => setName(e.target.value)}
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className='mt-4 flex flex-col gap-4'>
+            <FormField
+              control={form.control}
+              name='name'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Название</FormLabel>
+                  <FormControl>
+                    <Input placeholder='Введите название точки' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className='flex flex-col gap-2'>
-            <div>Логин</div>
-            <Input
-              placeholder='Введите логин точки'
-              value={login}
-              onChange={e => setLogin(e.target.value)}
+            <FormField
+              control={form.control}
+              name='login'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Логин</FormLabel>
+                  <FormControl>
+                    <Input placeholder='Введите логин точки' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className='flex flex-col gap-2'>
-            <div>Пароль</div>
-            <Input
-              type='password'
-              placeholder='Введите пароль точки'
-              value={password}
-              onChange={e => setPassword(e.target.value)}
+            <FormField
+              control={form.control}
+              name='password'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Пароль</FormLabel>
+                  <FormControl>
+                    <Input type='password' placeholder='Введите пароль точки' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-        </div>
 
-        <DialogFooter className='mt-6'>
-          <Button variant='outline' onClick={() => setOpen(false)}>
-            Отмена
-          </Button>
-          <Button onClick={handleCreate}>Создать</Button>
-        </DialogFooter>
+            <DialogFooter className='mt-6'>
+              <Button type='button' variant='outline' onClick={() => setOpen(false)}>
+                Отмена
+              </Button>
+
+              <Button type='submit' disabled={isPending}>
+                {isPending ? 'Создание...' : 'Создать'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   )
