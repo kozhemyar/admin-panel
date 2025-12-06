@@ -19,36 +19,58 @@ export const AchievementCard = () => {
 
   const { daily, weekly } = data
 
-  const tType = (type: keyof typeof GARBAGE.type) => GARBAGE.type[type]
-  const tSubtype = (sub: keyof typeof GARBAGE.subtype) => GARBAGE.subtype[sub]
-  const tState = (state: keyof typeof GARBAGE.state) => GARBAGE.state[state]
+  const tType = (type: keyof typeof GARBAGE.type | undefined) =>
+    type ? GARBAGE.type[type] : undefined
+
+  const tSubtype = (sub: keyof typeof GARBAGE.subtype | undefined) =>
+    sub ? GARBAGE.subtype[sub] : undefined
+
+  const w = weekly.quest
 
   return (
     <Card className='flex w-1/2 flex-col gap-6 p-6'>
-      {/* Еженедельное задание */}
       <div className='flex flex-col gap-2'>
         <div className='text-sm font-medium'>Еженедельное задание</div>
-        <div className='bg-muted rounded-md p-3'>
-          <div className='font-semibold'>Тип: {tType(weekly.subject.type)}</div>
-          <div>Подтип: {tSubtype(weekly.subject.subtype)}</div>
-          <div>Состояние: {tState(weekly.subject.state)}</div>
-          <div>Цель: {weekly.goal}</div>
+
+        <div className='bg-muted flex flex-col gap-2 rounded-md p-3'>
+          <div className='font-semibold'>Тип: {tType(w?.subject?.type)}</div>
+          <div>Подтип: {tSubtype(w?.subject?.subtype)}</div>
+          <div>Цель: {w?.goal}</div>
+
+          <div className='text-muted-foreground text-xs'>
+            Прогресс: {weekly.progress}/{w.goal}
+          </div>
         </div>
       </div>
 
-      {/* Ежедневные задания */}
       <div className='flex flex-col gap-2'>
         <div className='text-sm font-medium'>Ежедневные задания</div>
 
         <div className='flex flex-col gap-3'>
-          {daily.map(q => (
-            <div key={q.id} className='bg-muted rounded-md border p-3'>
-              <div className='font-semibold'>Тип: {tType(q.subject.type)}</div>
-              <div>Подтип: {tSubtype(q.subject.subtype)}</div>
-              <div>Состояние: {tState(q.subject.state)}</div>
-              <div>Цель: {q.goal}</div>
-            </div>
-          ))}
+          {daily?.map(d => {
+            const q = d.quest
+
+            return (
+              <div
+                key={q.id}
+                className='bg-muted flex flex-col gap-2 rounded-md border p-3'
+              >
+                {q.subject?.type ? (
+                  <div className='font-semibold'>Тип: {tType(q.subject.type)}</div>
+                ) : (
+                  <div className='font-semibold'>
+                    Подтип: {tSubtype(q.subject?.subtype)}
+                  </div>
+                )}
+
+                <div>Цель: {q.goal}</div>
+
+                <div className='text-muted-foreground text-xs'>
+                  Прогресс: {d.progress}/{q.goal}
+                </div>
+              </div>
+            )
+          })}
         </div>
       </div>
     </Card>

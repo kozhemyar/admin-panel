@@ -16,11 +16,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '../shared/popover'
 
 import { ConfirmDeleteModal } from './confirm-delete-modal'
 import { CreatePointModal } from './create-point-modal'
-import { useCreatePoint } from '@/api/points/queries/use-create-point'
 import { useGetPoints } from '@/api/points/queries/use-get-points'
 import { usePointStore } from '@/store/point-store'
 import { cn } from '@/utils/class-names'
-import { useDeletePoint } from '@/api/points/queries/use-delete-point-by-id'
 
 export function PointSelect() {
   const [open, setOpen] = useState(false)

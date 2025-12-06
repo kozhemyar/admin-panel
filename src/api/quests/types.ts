@@ -1,22 +1,26 @@
-export interface DailyQuest {
+export interface QuestSubject {
+  type?: GarbageType
+  subtype?: GarbageSubtype
+  state?: GarbageState
+}
+
+export interface QuestBase {
   id: string
   goal: number
-  subject: {
-    type: GarbageType
-    subtype: GarbageSubtype
-    state: GarbageState
-  }
+  subject: QuestSubject
   createdAt: string
 }
+
+export interface DailyQuest {
+  quest: QuestBase
+  progress: number
+  completed: boolean
+}
+
 export interface WeeklyQuest {
-  id: string
-  goal: number
-  subject: {
-    type: GarbageType
-    subtype: GarbageSubtype
-    state: GarbageState
-  }
-  createdAt: string
+  quest: QuestBase
+  progress: number
+  completed: boolean
 }
 
 export interface Quest {

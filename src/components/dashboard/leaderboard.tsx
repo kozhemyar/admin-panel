@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
@@ -6,49 +7,24 @@ import { useMemo, useState } from 'react'
 import { Button } from '../shared/button'
 import { Tabs, TabsList, TabsTrigger } from '../shared/tabs'
 
+import { useGetLeaderboard } from '@/api/leaderboard/queries/use-get-leaderboard'
 import { cn } from '@/utils/class-names'
 
-type User = {
-  id: number
-  name: string
-  score: number
-}
-
-const mockData = {
-  day: [
-    { id: 1, name: 'Alice', score: 130 },
-    { id: 2, name: 'Bob', score: 120 },
-    { id: 3, name: 'Charlie', score: 100 },
-    { id: 4, name: 'Eiana', score: 90 },
-    { id: 5, name: 'Dvan', score: 70 },
-  ],
-  week: [
-    { id: 1, name: 'Bob', score: 700 },
-    { id: 2, name: 'Charlie', score: 650 },
-    { id: 3, name: 'Alice', score: 600 },
-    { id: 4, name: 'Dvan', score: 500 },
-    { id: 5, name: 'Eiana', score: 430 },
-  ],
-  month: [
-    { id: 1, name: 'Charlie', score: 2500 },
-    { id: 2, name: 'Alice', score: 2300 },
-    { id: 3, name: 'Bob', score: 2100 },
-    { id: 4, name: 'Eiana', score: 1800 },
-    { id: 5, name: 'Dvan', score: 1600 },
-  ],
-}
-
 export const Leaderboard = () => {
-  const [period, setPeriod] = useState<'day' | 'week' | 'month'>('day')
+  const [period, setPeriod] = useState<'daily' | 'week' | 'month'>('daily')
   const [showAll, setShowAll] = useState(false)
 
   const [sortDesc, setSortDesc] = useState(true)
-  const [sortField, setSortField] = useState<'score' | 'name'>('score')
+  const [sortField, setSortField] = useState<'coins' | 'name'>('coins')
+
+  const { data, isLoading, isError } = useGetLeaderboard({ period })
+
+  const dataset = data?.data ?? []
 
   const sortedData = useMemo(() => {
-    const sorted = [...mockData[period]].sort((a, b) => {
-      if (sortField === 'score') {
-        return sortDesc ? b.score - a.score : a.score - b.score
+    const sorted = [...dataset].sort((a, b) => {
+      if (sortField === 'coins') {
+        return sortDesc ? b.coins - a.coins : a.coins - b.coins
       }
       if (sortField === 'name') {
         return sortDesc ? b.name.localeCompare(a.name) : a.name.localeCompare(b.name)
@@ -57,15 +33,31 @@ export const Leaderboard = () => {
     })
 
     return sorted
-  }, [period, sortDesc, sortField])
+  }, [dataset, sortDesc, sortField])
 
   const top3 = sortedData.slice(0, 3)
 
+  if (isLoading) {
+    return (
+      <div className='w-1/2 rounded-xl border bg-white p-6 shadow-sm'>
+        Загрузка рейтинга...
+      </div>
+    )
+  }
+
+  if (isError || !data) {
+    return (
+      <div className='w-1/2 rounded-xl border bg-white p-6 shadow-sm'>
+        Не удалось загрузить рейтинг
+      </div>
+    )
+  }
+
   return (
     <div className='w-1/2 rounded-xl border bg-white p-6 shadow-sm'>
-      <Tabs value={period} onValueChange={(v: any) => setPeriod(v as any)} className='mb-6'>
+      <Tabs value={period} onValueChange={(v: any) => setPeriod(v)} className='mb-6'>
         <TabsList className='grid w-full grid-cols-3'>
-          <TabsTrigger value='day'>День</TabsTrigger>
+          <TabsTrigger value='daily'>День</TabsTrigger>
           <TabsTrigger value='week'>Неделя</TabsTrigger>
           <TabsTrigger value='month'>Месяц</TabsTrigger>
         </TabsList>
@@ -82,14 +74,14 @@ export const Leaderboard = () => {
           <div className='mb-10 flex justify-center gap-6'>
             {top3.map((user, index) => (
               <motion.div
-                key={user.id}
+                key={user.userId}
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: index * 0.1 }}
                 className={cn('flex w-32 flex-col items-center rounded-xl p-4 shadow')}
               >
                 <div className='text-lg font-bold'>{user.name}</div>
-                <div className='text-sm opacity-70'>{user.score} pts</div>
+                <div className='text-sm opacity-70'>{user.coins} pts</div>
                 <div className='mt-1 text-xs font-semibold'>
                   {index === 0 ? '1st' : index === 1 ? '2nd' : '3rd'}
                 </div>
@@ -104,21 +96,21 @@ export const Leaderboard = () => {
           <Button
             variant='outline'
             onClick={() => {
-              setSortField('score')
-              setSortDesc(p => !p)
+              setSortField('coins')
+              setSortDesc(prev => !prev)
             }}
           >
-            Сортировка по очкам {sortDesc && sortField === 'score' ? '↓' : '↑'}
+            Очки {sortField === 'coins' && (sortDesc ? '↓' : '↑')}
           </Button>
 
           <Button
             variant='outline'
             onClick={() => {
               setSortField('name')
-              setSortDesc(p => !p)
+              setSortDesc(prev => !prev)
             }}
           >
-            Сортировка по имени {sortDesc && sortField === 'name' ? '↓' : '↑'}
+            Имя {sortField === 'name' && (sortDesc ? '↓' : '↑')}
           </Button>
         </div>
 
@@ -139,21 +131,21 @@ export const Leaderboard = () => {
               <table className='w-full text-left'>
                 <thead className='bg-gray-50'>
                   <tr>
-                    <th className='p-3'>Точка</th>
+                    <th className='p-3'>Участник</th>
                     <th className='p-3'>Очки</th>
                   </tr>
                 </thead>
                 <tbody>
                   {sortedData.map((user, i) => (
                     <motion.tr
-                      key={user.id}
+                      key={user.userId}
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.03 }}
                       className='border-t'
                     >
                       <td className='p-3'>{user.name}</td>
-                      <td className='p-3 font-semibold'>{user.score}</td>
+                      <td className='p-3 font-semibold'>{user.coins}</td>
                     </motion.tr>
                   ))}
                 </tbody>
