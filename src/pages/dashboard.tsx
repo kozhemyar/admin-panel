@@ -1,7 +1,8 @@
 'use client'
 
+import dynamic from 'next/dynamic'
+
 import { AchievementCard } from '@/components/dashboard/achievement-card'
-import { ActivityChart } from '@/components/dashboard/activity-chart'
 import { Leaderboard } from '@/components/dashboard/leaderboard'
 import { PointSelect } from '@/components/dashboard/point-select'
 import { ProblemItems } from '@/components/dashboard/problem-items'
@@ -11,7 +12,12 @@ import { useAuthGuard } from '@/hooks/use-auth-guard'
 
 import { getDashboardData } from '@/services/analytics-mocks'
 
-export const Dashboard = () => {
+const ActivityChart = dynamic(
+  () => import('@/components/dashboard/activity-chart').then(mod => mod.ActivityChart),
+  { ssr: false }
+)
+
+const Dashboard = () => {
   useAuthGuard()
 
   const data = getDashboardData()
@@ -42,3 +48,4 @@ export const Dashboard = () => {
     </div>
   )
 }
+export default Dashboard

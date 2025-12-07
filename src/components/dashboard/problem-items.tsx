@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertCircle, AlertTriangle, Download, TrendingUp } from 'lucide-react'
+import { AlertCircle, AlertTriangle, TrendingUp } from 'lucide-react'
 
 import { cn } from '@/utils/class-names'
 

@@ -14,7 +14,7 @@ import { Input } from '@/components/shared/input'
 
 import { LOCAL_STORAGE } from '@/constants/local-storage'
 
-export const AuthPage = () => {
+const AuthPage = () => {
   const [login, setLogin] = useState('')
   const [password, setPassword] = useState('')
   const router = useRouter()
@@ -69,3 +69,4 @@ export const AuthPage = () => {
     </div>
   )
 }
+export default AuthPage
